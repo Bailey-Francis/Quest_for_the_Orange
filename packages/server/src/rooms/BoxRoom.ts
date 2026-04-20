@@ -7,6 +7,7 @@ const MAX_POS = WORLD_SIZE - BOX_SIZE;
 const SPEED = 200;
 
 export class Player extends Schema {
+  @type("number") id = Math.random();
   @type("number") x = 0;
   @type("number") y = 0;
   @type("string") color = "#ffffff";

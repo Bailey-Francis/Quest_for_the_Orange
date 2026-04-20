@@ -2,6 +2,7 @@ import { Client, type Room } from "colyseus.js";
 import "./style.css";
 
 interface PlayerState {
+  id: number;
   x: number;
   y: number;
   color: string;
@@ -22,7 +23,7 @@ if (!ctx) throw new Error("2d context unavailable");
 
 let state: GameStateLike | null = null;
 
-const localPlayerPositions = { x: 0, y: 0 };
+const localPlayerPositions: Record<number, { x: number; y: number }> = {};
 
 function draw() {
   if (!ctx || !canvas) return;
@@ -30,13 +31,22 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (state?.players) {
     for (const networkPosition of state.players.values()) {
-      localPlayerPositions.x = (10 * localPlayerPositions.x + networkPosition.x) / 11;
-      localPlayerPositions.y = (10 * localPlayerPositions.y + networkPosition.y) / 11;
-
+      if (!localPlayerPositions[networkPosition.id]) {
+        localPlayerPositions[networkPosition.id] = { x: networkPosition.x, y: networkPosition.y };
+      }
+      localPlayerPositions[networkPosition.id] = {
+        x: (10 * localPlayerPositions[networkPosition.id].x + networkPosition.x) / 11,
+        y: (10 * localPlayerPositions[networkPosition.id].y + networkPosition.y) / 11,
+      };
       ctx.fillStyle = "#fff";
       ctx.fillRect(networkPosition.x, networkPosition.y, BOX_SIZE, BOX_SIZE);
       ctx.fillStyle = networkPosition.color;
-      ctx.fillRect(localPlayerPositions.x, localPlayerPositions.y, BOX_SIZE, BOX_SIZE);
+      ctx.fillRect(
+        localPlayerPositions[networkPosition.id].x,
+        localPlayerPositions[networkPosition.id].y,
+        BOX_SIZE,
+        BOX_SIZE,
+      );
     }
   }
   requestAnimationFrame(draw);
