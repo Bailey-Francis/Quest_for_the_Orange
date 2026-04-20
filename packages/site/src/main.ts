@@ -22,14 +22,21 @@ if (!ctx) throw new Error("2d context unavailable");
 
 let state: GameStateLike | null = null;
 
+const localPlayerPositions = { x: 0, y: 0 };
+
 function draw() {
   if (!ctx || !canvas) return;
   ctx.fillStyle = "#222";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (state?.players) {
-    for (const p of state.players.values()) {
-      ctx.fillStyle = p.color;
-      ctx.fillRect(p.x, p.y, BOX_SIZE, BOX_SIZE);
+    for (const networkPosition of state.players.values()) {
+      localPlayerPositions.x = (10 * localPlayerPositions.x + networkPosition.x) / 11;
+      localPlayerPositions.y = (10 * localPlayerPositions.y + networkPosition.y) / 11;
+
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(networkPosition.x, networkPosition.y, BOX_SIZE, BOX_SIZE);
+      ctx.fillStyle = networkPosition.color;
+      ctx.fillRect(localPlayerPositions.x, localPlayerPositions.y, BOX_SIZE, BOX_SIZE);
     }
   }
   requestAnimationFrame(draw);
